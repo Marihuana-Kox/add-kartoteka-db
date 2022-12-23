@@ -6,9 +6,9 @@ from connect_db import CRUDDB
 
 db = CRUDDB('localhost', 'root', 'root', 'kartoteka_klientov')
 repl = lists.replasment()
-# filename = 'kartoteka.min.xlsx'
+filename = 'kartoteka.min.xlsx'
 # filename = 'min.test2.xlsx'
-filename = 'КАРТОТЕКА.xlsx'
+# filename = 'КАРТОТЕКА.xlsx'
 
 
 def format_date(str_date):
@@ -26,9 +26,13 @@ def format_date(str_date):
             new = "13-10-"+new.strip()
         else:
             new = re.sub("\.", "-", new.strip())
-
-        value_date = dt.strptime(new, "%d-%m-%Y").date()
-        return value_date
+            try:
+                value_date = dt.strptime(new, "%d-%m-%Y").date()
+            except ValueError:
+                value_date = new
+                print("Дата введена не коректно {} ".format(value_date))
+                break
+            return value_date
 
 
 def servises(value, repl_list):
@@ -41,15 +45,24 @@ def servises(value, repl_list):
     servis_list = []
     """Убираем в строке лишнее"""
     for x, y in repl_list:
-        value = re.sub(r"{}".format(x), y, value)
+        value = re.sub(r"{}".format(x), y, value) #"^([а-яА-Я\.;\s]?)+$"gm
+    """Поучаем длинну строки"""
+    
+    count_templ = re.fullmatch(r"^([а-яА-Я\.,;()\s]?)+$", value)
+    """И если совпадает добавляем в список"""
+    if count_templ is not None:
+        servis_list.append((count_templ.group(), None))
+
+    
     """Получаем индекс последнего вхождения даты"""
     vk_l = re.search(r"[^\.\d{2,4}]+[*?\w\s+\.,\+()+][^\d]+$", value)
-    infor = re.search(r"(.*?\w+\s+\d{4}[\s\D]?)$", value)
     """Проверяем, осталось ли еще что нибудь после последней даты"""
+    infor = re.search(r"(.*?\w+\s+\d{4}[\s\D]?)$", value)
+    
     if vk_l is not None and vk_l.start() > 0:
         komment = value[vk_l.start():].strip()
         komment = re.sub(r"^(/)", "", komment)
-        servis_list.append((komment, 1111))
+        servis_list.append((komment, None))
     elif infor is not None:
         servis_list.append((value[:infor.end()], dt.strptime("01/01/1970", "%d/%m/%Y").date()))
     
@@ -88,7 +101,7 @@ def phones_names(phonesnames):
     if len(str(phonesnames).strip()) >= 11:
         ph_list = str(phonesnames).split('/')
     else:
-        phone_list.append((3333, "Телефон не указан"))
+        phone_list.append((None, "Телефон не указан"))
         return phone_list
     col = len(ph_list)
     for t in range(col):
@@ -98,7 +111,7 @@ def phones_names(phonesnames):
             if len(tel_name) == 2:
                 phone_list.append((tel_name[0], tel_name[1]))
             else:
-                phone_list.append((4444, "Телефон не указан"))
+                phone_list.append((None, "Телефон не указан"))
         else:
             if len(phon_name) == 11:
                 phone_list.append((ph_list[t], None))
@@ -111,7 +124,7 @@ def add_list_exel():
     собираем в словарь. Затем передаем в функцию для добавления в базу данных
     """
     wrkbk = lw(filename)
-    file = wrkbk['алк']   # active
+    file = wrkbk['alk']   # active
     id = 1
 
     main_dist = {}
@@ -133,12 +146,12 @@ def add_list_exel():
                         except AttributeError:
                             id_dist.update(date=format_date(value))
                     else:
-                        id_dist.update(date=["Дата отсутствует"])
+                        id_dist.update(date=None)
                 elif i == 3:
                     if value is not None:
                         id_dist.update(servis=servises(value, repl))
                     else:
-                        id_dist.update(servis=['Информация отсутствует'])
+                        id_dist.update(servis=[('Информация отсутствует', None)])
                 elif i == 4:
                     id_dist.update(phones=phones_names(value))
 
@@ -147,9 +160,15 @@ def add_list_exel():
         id += 1
     return main_dist.items()
 
-
-i = 0
-for items in add_list_exel():
-    db.chench_connect_db(items)
-    # print("{}".format(items), end=" ")
-    # print(" ")
+massiv = add_list_exel()
+# 1 Пставляем в БД
+# 0 Просто распечатываем
+# 2 Проверяем есть ли уже в БД
+q = 2
+for items in massiv:
+    if items[1]['name'] is None:
+        continue
+    else:
+        db.chench_connect_db(items, q)
+        # print("{} : {}".format(items[1]['name'], items[1]['servis']), end=" ")
+        # print(" ")
