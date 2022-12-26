@@ -16,23 +16,9 @@ class CRUDDB:
             database=self.database,
             cursorclass=pymysql.cursors.DictCursor)
 
-    def chench_connect_db(self, data_list, q):
+    def chench_connect_db(self, data_list):
 
-        # with self.con.cursor() as cur:
-        #     cur.execute("SELECT VERSION()")
-        #     version = cur.fetchone()
-        #     cur.execute("CREATE DATABASE IF NOT EXISTS `kartoteka_klientov`")
-        #     dbname = cur.fetchone()
-        #         # print 'db exists'
-        #     print(str("Database version: {}".format(version['VERSION()'])))
-            # print(str("Database version: {}".format(dbname['VERSION()'])))
-
-        #     cur.close()
-        # def insert_data_by(self, data_list):
-
-           # self.cursor = self.con.cursor()
-
-        if data_list is not None and q == 1:
+        if data_list is not None:
             with self.con.cursor() as cur:
 
                 sql = "INSERT INTO `klient_list` (`klient_name`, `klient_age`) VALUES (%s, %s)"
@@ -70,21 +56,28 @@ class CRUDDB:
                 print(
                     "-------------------------------------------------------------------------")
             cur.close()
-        elif data_list is not None and q == 0:
-            print(str(
-                "Клиент: {} - {} года рождения;".format(data_list[1]['name'], data_list[1]['date'])))
-            for ph in data_list[1]['phones']:
-                if ph[0] is not None:
-                    print(str("Телефон: {} : {} добавлен в базу к {};".format(
-                        ph[0], ph[1], data_list[1]['name'])))
+    
+    
+    def not_db_add_only_view(self, data_list):
+        if data_list is not None:
+            print(data_list[1]['servis'])
+            # if data_list[1]['servis'] is None:
+            #     print(str(
+            #         "Клиент: {} - {} года рождения;".format(data_list[1]['name'], data_list[1]['date'])))
+            #     for ph in data_list[1]['phones']:
+            #         if ph[0] is not None:
+            #             print(str("Телефон: {} : {} добавлен в базу к {};".format(
+            #                 ph[0], ph[1], data_list[1]['name'])))
 
-            
-            for sr in data_list[1]['servis']:
-                comment = ''
-                if sr[0] is not None:
-                    print(str("Лечение: {} дата: {} получил клиент: {};".format(sr[0], sr[1], data_list[1]['name'])))
+                
+            #     for sr in data_list[1]['servis']:
+            #         comment = ''
+            #         if sr[0] is not None:
+            #             print(str("Лечение: {} дата: {} получил клиент: {};".format(sr[0], sr[1], data_list[1]['name'])))
             print("-------------------------------------------------------------------------")    # self.con.commit()
-        else:
+    
+    
+    def add_db_if_none(self, data_list):
             with self.con.cursor() as cur:
 
                 # sql = "INSERT INTO `klient_list` (`klient_name`, `klient_age`) VALUES (%s, %s)"
@@ -109,7 +102,7 @@ class CRUDDB:
 
                 for ph in data_list[1]['phones']:
                     if ph[0] is not None:
-                        print(str("Телефон: {} : {} добавлен в базу к {};".format(
+                        print(str("Телефон: {} : {} ) добавлен в базу к {};".format(
                             ph[0], ph[1], data_list[1]['name'])))
 
                 
