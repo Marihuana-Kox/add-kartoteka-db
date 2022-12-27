@@ -60,20 +60,23 @@ class CRUDDB:
     
     def not_db_add_only_view(self, data_list):
         if data_list is not None:
-            print(data_list[1]['servis'])
-            # if data_list[1]['servis'] is None:
-            #     print(str(
-            #         "Клиент: {} - {} года рождения;".format(data_list[1]['name'], data_list[1]['date'])))
-            #     for ph in data_list[1]['phones']:
-            #         if ph[0] is not None:
-            #             print(str("Телефон: {} : {} добавлен в базу к {};".format(
-            #                 ph[0], ph[1], data_list[1]['name'])))
+            # print(data_list[1]['servis'])
+            # if data_list[1]['servis'] is not None:
+            print(str(
+                "Клиент: {} - {} года рождения;".format(data_list[1]['name'], data_list[1]['date'])))
+            for ph in data_list[1]['phones']:
+                if ph[0] is not None:
+                    print(str("Телефон: {} : {} добавлен в базу к {};".format(
+                        ph[0], ph[1], data_list[1]['name'])))
+                else:
+                    print(str("Телефон {} не указал;".format(
+                        data_list[1]['name'])))
 
-                
-            #     for sr in data_list[1]['servis']:
-            #         comment = ''
-            #         if sr[0] is not None:
-            #             print(str("Лечение: {} дата: {} получил клиент: {};".format(sr[0], sr[1], data_list[1]['name'])))
+            
+            for sr in data_list[1]['servis']:
+                comment = ''
+                if sr[0] is not None:
+                    print(str("Лечение: {} дата: {} получил клиент: {};".format(sr[0], sr[1], data_list[1]['name'])))
             print("-------------------------------------------------------------------------")    # self.con.commit()
     
     
