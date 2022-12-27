@@ -6,34 +6,15 @@ from connect_db import CRUDDB
 db = CRUDDB('localhost', 'root', 'root', 'kartoteka_klientov')
 repl = lists.replasment()
 # filename = 'kartoteka.new.xlsx'
-filename = 'kartoteka.min.xlsx'
-# filename = 'КАРТОТЕКА.xlsx'
+# filename = 'kartoteka.min.xlsx'
+filename = 'КАРТОТЕКА.xlsx'
 
 
-def format_date(str_date):
+def new_format_date(value_date):
     """
     Обработка строки ДАТА и приведение её к нужному формату
     добавляем рандомный день и месяц если их нет
     """
-    new_date = str(str_date).strip()
-    newdate = re.findall(r"(\d+\.\d+\.\d{4})", new_date)
-    if len(newdate) == 0:
-        newdate = re.findall(r"(\d{4})", new_date)
-        # return newdate
-    for new in newdate:
-        if len(new) == 4:
-            new = "13-10-"+new.strip()
-        else:
-            new = re.sub("\.", "-", new.strip())
-            try:
-                value_date = dt.strptime(new, "%d-%m-%Y").date()
-            except ValueError:
-                value_date = new
-                break
-            return value_date
-
-
-def new_format_date(value_date):
     search = re.search(r"(\d+\.\d+\.\d{2,4})", str(value_date))
     
     if search:
@@ -62,7 +43,7 @@ def new_servises(value, repl_list):
    
     """Если в строке есть дата добавляем в список"""
     servis_list = re.findall(r"(.*?\d+\.\d+\.\d+)[;\s/]?", value)
-    # print(servis_list)
+    
     if len(servis_list) > 0:
         for ser in servis_list:
             val = str(ser).strip(". / ,")
@@ -75,79 +56,17 @@ def new_servises(value, repl_list):
             else:
                 servis_.append((sub_by_text, new_date))
 
-    """Если в строке есть что то после даты"""
-    string_no_date = re.search(r"[\D]+(\w)+\s?$", value)
-    if string_no_date:
-        servis_.append((string_no_date.group().strip(), None))
+    # """Если в строке есть что то после даты"""
+    # string_no_date = re.search(r"[\D]+(\w)+\s?$", value)# "[^\.\d]{2,4}?([а-яА-Я0-9_\+\"\-\s]*)([\d]{4})?$"
+    # if string_no_date:
+    #     servis_.append((string_no_date.group().strip(), None)) "^(\w)+(?:\d{0,2}[^\.])+$"
 
     """Если в строке только текст без даты"""
-    text_yahr = re.search(r"^(\w)+(?:\d{0,2}[^\.])+$", value)
+    text_yahr = re.search(r"[^\.\d]{2,4}?([а-яА-Я0-9_!(),\+\"\-\s]*)([\d]{4})?$", value)
     if text_yahr:
         servis_.append((text_yahr.group().strip(), None))
 
     return servis_
-
-
-# def servises(value, repl_list):
-#     """
-#     Поручаем строку и кортеж с данными для правки строки.
-#     Исправляем неточности в строке, методом sub() приводим строку к единому стилю написания
-#     (убираем лишние пробелы и символы). Получаем все совпадения с шаблоном методом findall()
-#     и возвращаем результат
-#     """
-#     servis_list = []
-#     """Убираем в строке лишнее"""
-#     for x, y in repl_list:
-#         value = re.sub(r"{}".format(x), y, value) 
-#     """Поучаем длинну строки"""
-    
-#     count_templ = re.fullmatch(r"^([а-яА-Я\.,;\_\-+()\s]?)+$", value)
-#     """И если совпадает добавляем в список"""
-#     if count_templ is not None:
-#         servis_list.append((count_templ.group(), None))
-
-#     """Получаем индекс последнего вхождения даты"""
-#     vk_l = re.search(r"[^\.\d{2,4}]+[*?\w\s+\.,\+()+][^\d]+$", value)
-#     """Проверяем, осталось ли еще что нибудь после последней даты"""
-#     infor = re.search(r"(.*?\w+\s+\d{4}[\s\D]?)$", value)
-    
-#     if vk_l is not None and vk_l.start() > 0:
-#         komment = value[vk_l.start():].strip()
-#         komment = re.sub(r"^(/)", "", komment)
-#         servis_list.append((komment, None))
-#     elif infor is not None:
-#         servis_list.append((value[:infor.end()], dt.strptime("01/01/1970", "%d/%m/%Y").date()))
-    
-#     match_date = re.findall(r"(.*?\d+\.\d+\.\d+)[;\s]?", value)
-
-#     sub_servis_str = ''
-#     for i in range(len(match_date)):
-#         l = re.search(r"(\d+\.\d+\.\d)", match_date[i])
-
-#         servis_string = match_date[i][:l.start()]
-#         data_string = match_date[i][l.start():]
-#         s = re.search(r"(\.\w{2})$", data_string)
-#         if s:
-#             data_string = data_string[:s.start()] + "/20" + data_string[-2:]
-#         data_string = re.sub("\.", "/", data_string)
-
-#         if re.match(r"(\d+\/\d+\/20\d{2})$", data_string) is not None:
-#             # print(data_string)
-#             date_by = dt.strptime(data_string, "%d/%m/%Y").date()
-#         else:
-#             date_by = dt.strptime("01/01/1970", "%d/%m/%Y").date()
-
-#         servis_string = re.sub(r"^(/)", "", servis_string)
-#         if len(servis_string) != 0:
-#             sub_servis_str = servis_string
-#             servis_list.append((servis_string, date_by))
-#         else:
-#             servis_list.append((sub_servis_str, date_by))
-
-#     if servis_list is not None:
-#         return servis_list
-#     else:
-#         return [('Информация не считалась', None)]
 
 
 def phones_names(phonesnames):
@@ -178,7 +97,7 @@ def add_list_exel():
     собираем в словарь. Затем передаем в функцию для добавления в базу данных
     """
     wrkbk = lw(filename)
-    file = wrkbk['alk']   # active
+    file = wrkbk['УЗИ']   # active
     id = 1
 
     main_dist = {}
