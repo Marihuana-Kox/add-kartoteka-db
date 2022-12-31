@@ -135,36 +135,28 @@ def add_list_exel():
     return main_dist.items()
 
 massiv = add_list_exel()
-# 1 Пставляем в БД
-# 0 Просто распечатываем
-# 2 Проверяем есть ли уже в БД
-# q = 1
+
+colum_list = ['klient_name', 'klient_age']
+table = 'klient_list'
+klient = models.Model(table, colum_list)
+
+colum_list = ['klient_phone_id', 'phone_num', 'abonent_name']
+table = 'phones_list'
+phones = models.Model(table, colum_list)
+
+colum_list = ['received_klient_id', 'received_text', 'received_date', 'received_comment']
+table = 'services_received'
+servis = models.Model(table, colum_list)
+
+age = dt.strptime("1-11-1989", "%d-%m-%Y").date()
+data = ['Марконогов Николай Мамонович', age]
+tabl_id = 'klient_name'
+id = data[0]
+
+klient.model_insert_tables(data, tabl_id, id)
 # for items in massiv:
 #     if items[1]['name'] is None:
 #         continue
 #     else:
-#         if q == 0:
-#             db.not_db_add_only_view(items)
-#         elif q == 1:
-#             db.chench_connect_db(items)
-#         else:
-#             db.add_db_if_none(items)
-        # print("{} : {}".format(items[1]['name'], items[1]['servis']), end=" ")
-        # print(" ")
-age = dt.strptime('12-10-1948', "%d-%m-%Y").date()
-
-data = ['Петрушкина Людмила Прокофьевна', age]
-
-colum_list = ['klient_name', 'klient_age']  
-
-table = 'klient_list'
-
-mode = models.Model(data, table, colum_list)
-# list_klients = mode.model_select()
-# klient_by = mode.model_select_by('klient_id', 126)
-# mode.model_insert()
-# mode.model_update('klient_id', 120)
-mode.model_delete('klient_id', 124)
-# print(klient_by[0]['klient_age'])
-# for m in list_klients:
-#     print(m['klient_id'])
+#         print(items[1], end=" ")
+#     print(" ")
