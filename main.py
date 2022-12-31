@@ -1,13 +1,14 @@
-import re, random, lists
+import re, lists
 from openpyxl import load_workbook as lw
 from datetime import datetime as dt
 from connect_db import CRUDDB
+import models
 
 db = CRUDDB('localhost', 'root', 'root', 'kartoteka_klientov')
 repl = lists.replasment()
 # filename = 'kartoteka.new.xlsx'
-# filename = 'kartoteka.min.xlsx'
-filename = 'КАРТОТЕКА.xlsx'
+filename = 'kartoteka.min.xlsx'
+# filename = 'КАРТОТЕКА.xlsx'
 
 
 def new_format_date(value_date):
@@ -62,7 +63,7 @@ def new_servises(value, repl_list):
     #     servis_.append((string_no_date.group().strip(), None)) "^(\w)+(?:\d{0,2}[^\.])+$"
 
     """Если в строке только текст без даты"""
-    text_yahr = re.search(r"[^\.\d]{2,4}?([а-яА-Я0-9_!(),\+\"\-\s]*)([\d]{4})?$", value)
+    text_yahr = re.search(r"[^\.\d]{2,4}?([а-яА-Я0-9_!(,)\+\"\-\s]*)([\d]{4})?$", value)
     if text_yahr:
         servis_.append((text_yahr.group().strip(), None))
 
@@ -97,7 +98,7 @@ def add_list_exel():
     собираем в словарь. Затем передаем в функцию для добавления в базу данных
     """
     wrkbk = lw(filename)
-    file = wrkbk['УЗИ']   # active
+    file = wrkbk['alk']   # active
     id = 1
 
     main_dist = {}
@@ -137,16 +138,33 @@ massiv = add_list_exel()
 # 1 Пставляем в БД
 # 0 Просто распечатываем
 # 2 Проверяем есть ли уже в БД
-q = 0
-for items in massiv:
-    if items[1]['name'] is None:
-        continue
-    else:
-        if q == 0:
-            db.not_db_add_only_view(items)
-        elif q == 1:
-            db.chench_connect_db(items)
-        else:
-            db.add_db_if_none(items)
+# q = 1
+# for items in massiv:
+#     if items[1]['name'] is None:
+#         continue
+#     else:
+#         if q == 0:
+#             db.not_db_add_only_view(items)
+#         elif q == 1:
+#             db.chench_connect_db(items)
+#         else:
+#             db.add_db_if_none(items)
         # print("{} : {}".format(items[1]['name'], items[1]['servis']), end=" ")
         # print(" ")
+age = dt.strptime('12-10-1948', "%d-%m-%Y").date()
+
+data = ['Петрушкина Людмила Прокофьевна', age]
+
+colum_list = ['klient_name', 'klient_age']  
+
+table = 'klient_list'
+
+mode = models.Model(data, table, colum_list)
+# list_klients = mode.model_select()
+# klient_by = mode.model_select_by('klient_id', 126)
+# mode.model_insert()
+# mode.model_update('klient_id', 120)
+mode.model_delete('klient_id', 124)
+# print(klient_by[0]['klient_age'])
+# for m in list_klients:
+#     print(m['klient_id'])
