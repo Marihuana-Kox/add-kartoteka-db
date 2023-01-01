@@ -4,7 +4,7 @@ from datetime import datetime as dt
 from connect_db import CRUDDB
 import models
 
-db = CRUDDB('localhost', 'root', 'root', 'kartoteka_klientov')
+# db = CRUDDB('localhost', 'root', 'root', 'kartoteka_klientov')
 repl = lists.replasment()
 # filename = 'kartoteka.new.xlsx'
 filename = 'kartoteka.min.xlsx'
@@ -148,15 +148,25 @@ colum_list = ['received_klient_id', 'received_text', 'received_date', 'received_
 table = 'services_received'
 servis = models.Model(table, colum_list)
 
-age = dt.strptime("1-11-1989", "%d-%m-%Y").date()
-data = ['Марконогов Николай Мамонович', age]
+# age = dt.strptime("1-11-1989", "%d-%m-%Y").date()
+# data = ['Марконогов Николай Мамонович', age]
 tabl_id = 'klient_name'
-id = data[0]
+# id = "'Степанюк Юрий Леонтьевич'"
+# id = data[0]
 
-klient.model_insert_tables(data, tabl_id, id)
-# for items in massiv:
-#     if items[1]['name'] is None:
-#         continue
-#     else:
-#         print(items[1], end=" ")
-#     print(" ")
+for items in massiv:
+    if items[1]['name'] is None:
+        continue
+    else:
+        id = items[1]['name']
+        klient.model_insert([items[1]['name'], items[1]['date']])
+        kid = klient.model_select_by(tabl_id, id)
+        print(kid)
+        # if kid:
+        #     for phon in items[1]['phones']:
+        #         phones.model_insert_noduble(phon, 0, phon[0], 'klient_phone_id', kid[0]['klient_id'])
+        #     for serv in items[1]['servis']:
+        #         comment = ''
+        #         comment = [serv[0] if serv[1] is None else None]
+        #         servis.model_insert([kid[0]['klient_id'], serv[0] if comment == '' else None, serv[1], comment])
+    # print("------------------------------------------ ")
