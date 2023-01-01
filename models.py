@@ -16,9 +16,9 @@ class Model:
         return db_date
 
     def model_select_by(self, tabl_id, id):
-        with db.con.cursor() as cur:
-            cur.execute(f"SELECT * FROM {self.table} WHERE {tabl_id}={id}")
-            db_date_by = cur.fetchall()
+        cur = db.con.cursor()
+        cur.execute(f"SELECT * FROM {self.table} WHERE {tabl_id}='{id}'")
+        db_date_by = cur.fetchall()
         return db_date_by
 
     def model_insert(self, data):
@@ -29,26 +29,29 @@ class Model:
             try:
                 cur.execute(sql, (data))
                 db.con.commit()
-                db.con.close()
+                # db.con.close()
                 print("Запись успешно создана")
             except pymysql.err.IntegrityError:
                 print("Такая запись, уже есть в БД")
+            
 
     def model_insert_noduble(self, data, q, match ,tabl_id, id):
         """Игнорирует добавление дублирующих записей"""
         with db.con.cursor() as cur:
-            cur.execute(f"SELECT * FROM {self.table} WHERE {tabl_id}={id}")
+            cur.execute(f"SELECT {match} FROM {self.table} WHERE {tabl_id}='{id}'")
         duble = cur.fetchall()
         if len(duble) != 0:
             mtlist = []
-            for el in duble:
-                mtlist.append(el[match])
+            for el in duble[0]:
+                mtlist.append(duble[0][match])
+                
             if data[q] in mtlist:
                 print(f"Запись: {data[q]} уже есть.")
             else:
                 self.model_insert(self, data) 
         else:
             self.model_insert(self, data)
+        
 
     def model_update(self, data, tabl_id, id):
         columns = ", ".join([row + '=%s' for row in self.colum_list])
