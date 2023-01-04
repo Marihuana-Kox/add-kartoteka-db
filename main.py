@@ -162,15 +162,24 @@ for items in massiv:
     if items[1]['name'] is None:
         continue
     else:
+        ser_list = []
         id = items[1]['name']
         klient.model_insert([items[1]['name'], items[1]['date']])
         kid = klient.model_select_by(tabl_id, id)
+        match_servis = servis.model_select_by('received_klient_id', kid[0]['klient_id'])
         # break
         if kid:
             for phon in items[1]['phones']:
                 phones.model_insert_noduble(phon, 0, 'phone_num', 'klient_phone_id', kid[0]['klient_id'])
             for serv in items[1]['servis']:
                 comment = ''
-                comment = [serv[0] if serv[1] is None else None]
-                servis.model_insert([kid[0]['klient_id'], serv[0] if comment == '' else None, serv[1], comment])
+                if serv[1] is None:
+                    comment = serv[0]
+                servis_ = [serv[0] if comment == '' else None]
+                date_servis_ = serv[1]
+                data = [kid[0]['klient_id'], servis_, date_servis_, comment]
+                if servis_ in ser_list and date_servis_ in ser_list:
+                    print("Такая услуга уже есть")
+                else:
+                    servis.model_insert(data)
     # print("------------------------------------------ ")

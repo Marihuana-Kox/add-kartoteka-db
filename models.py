@@ -34,9 +34,16 @@ class Model:
             except pymysql.err.IntegrityError:
                 print("Такая запись, уже есть в БД")
             
-
+    def model_insert_not_duble(self, **params):
+        """Игнорирует добавление дублирующих записей"""
+        with db.con.cursor() as cur:
+            cur.execute(f"SELECT * FROM {self.table} WHERE {tabl_id}='{id}'")
+        pass
+    
+    
     def model_insert_noduble(self, data, q, match ,tabl_id, id):
         """Игнорирует добавление дублирующих записей"""
+        print(data)
         with db.con.cursor() as cur:
             cur.execute(f"SELECT {match} FROM {self.table} WHERE {tabl_id}='{id}'")
         duble = cur.fetchall()
