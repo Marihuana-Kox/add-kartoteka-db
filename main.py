@@ -7,8 +7,8 @@ import models
 # db = CRUDDB('localhost', 'root', 'root', 'kartoteka_klientov')
 repl = lists.replasment()
 # filename = 'kartoteka.new.xlsx'
-filename = 'kartoteka.min.xlsx'
-# filename = 'КАРТОТЕКА.xlsx'
+# filename = 'kartoteka.min.xlsx'
+filename = 'КАРТОТЕКА (4).xlsx'
 
 
 def new_format_date(value_date):
@@ -25,13 +25,18 @@ def new_format_date(value_date):
             left = new_date[kz.start():]
             right = new_date[:kz.start()]
             new_date_ = right + '-20' + left[1:]
+            print(new_date_)
             return dt.strptime(new_date_.strip(), "%d-%m-%Y").date()
         else:
+            print(new_date)
             return dt.strptime(new_date, "%d-%m-%Y").date()
     else:
         one_yahr_ = re.search(r"(\d{4})", str(value_date))
-        one_yahr = "01-01-" + one_yahr_.group()
-        return dt.strptime(one_yahr.strip(), "%d-%m-%Y").date()
+        if one_yahr_ is not None:
+            one_yahr = "01-01-" + one_yahr_.group()
+            return dt.strptime(one_yahr.strip(), "%d-%m-%Y").date()
+        else:
+            return None
         
     
 
@@ -51,6 +56,7 @@ def new_servises(value, repl_list):
             by_date = re.search(r"(\d+\.\d+\.\d+)", val)
             new_date = new_format_date(by_date.group())
             by_text = val[:by_date.start()].strip()
+            # print(by_date)
             if by_text:
                 servis_.append((by_text, new_date))
                 sub_by_text = by_text
@@ -98,7 +104,7 @@ def add_list_exel():
     собираем в словарь. Затем передаем в функцию для добавления в базу данных
     """
     wrkbk = lw(filename)
-    file = wrkbk['alk']   # active
+    file = wrkbk['УЗИ']   # active
     id = 1
 
     main_dist = {}
@@ -148,38 +154,46 @@ colum_list = ['received_klient_id', 'received_text', 'received_date', 'received_
 table = 'services_received'
 servis = models.Model(table, colum_list)
 
-parametr_phone = [
-    'phone_num',
-    'klient_phone_id',
-]
+# phones.model_delete('klient_phone_id', 117)
 # age = dt.strptime("1-11-1989", "%d-%m-%Y").date()
 # data = ['Марконогов Николай Мамонович', age]
 tabl_id = 'klient_name'
 # id = "'Степанюк Юрий Леонтьевич'"
 # id = data[0]
-
-for items in massiv:
-    if items[1]['name'] is None:
-        continue
-    else:
-        ser_list = []
-        id = items[1]['name']
-        klient.model_insert([items[1]['name'], items[1]['date']])
-        kid = klient.model_select_by(tabl_id, id)
-        match_servis = servis.model_select_by('received_klient_id', kid[0]['klient_id'])
-        # break
-        if kid:
+q = 555
+if q == 555:
+    for items in massiv:
+        if items[1]['name'] is None:
+            continue
+        else:
+            klient.model_insert([items[1]['name'], items[1]['date']])
+        if items[1]['phones'] is None:
+            continue
+        else:
+            id = items[1]['name']
             for phon in items[1]['phones']:
-                phones.model_insert_noduble(phon, 0, 'phone_num', 'klient_phone_id', kid[0]['klient_id'])
+                kid = klient.model_select_by(tabl_id, id)
+                data = [kid[0]['klient_id'], phon[0], phon[1]]
+                params = ['phone_num', 'klient_phone_id', kid[0]['klient_id']]
+                phones.model_insert_not_duble(data, params)
+            
             for serv in items[1]['servis']:
+                old_servis = []
                 comment = ''
                 if serv[1] is None:
                     comment = serv[0]
                 servis_ = [serv[0] if comment == '' else None]
                 date_servis_ = serv[1]
                 data = [kid[0]['klient_id'], servis_, date_servis_, comment]
-                if servis_ in ser_list and date_servis_ in ser_list:
-                    print("Такая услуга уже есть")
+                duble = servis.model_select_by('received_klient_id', kid[0]['klient_id'])
+                
+                if len(duble) != 0:
+                    dub = duble[0]
+                    if dub['received_klient_id'] == data[0] and dub['received_text'] in data[1] and \
+                        dub['received_date'] == data[2] and dub['received_comment'] in data[3]:
+                        print("Такая услуга уже есть")
+                    else:
+                        servis.model_insert(data)
                 else:
                     servis.model_insert(data)
     # print("------------------------------------------ ")

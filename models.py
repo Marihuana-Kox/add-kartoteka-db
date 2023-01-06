@@ -29,36 +29,33 @@ class Model:
             try:
                 cur.execute(sql, (data))
                 db.con.commit()
-                # db.con.close()
                 print("Запись успешно создана")
             except pymysql.err.IntegrityError:
                 print("Такая запись, уже есть в БД")
-            
-    def model_insert_not_duble(self, **params):
-        """Игнорирует добавление дублирующих записей"""
-        with db.con.cursor() as cur:
-            cur.execute(f"SELECT * FROM {self.table} WHERE {tabl_id}='{id}'")
-        pass
+       
     
-    
-    def model_insert_noduble(self, data, q, match ,tabl_id, id):
+    def model_insert_not_duble(self, data ,params):
         """Игнорирует добавление дублирующих записей"""
-        print(data)
-        with db.con.cursor() as cur:
-            cur.execute(f"SELECT {match} FROM {self.table} WHERE {tabl_id}='{id}'")
+        colum_list = ['klient_phone_id', 'phone_num', 'abonent_name']
+        table = 'phones_list'
+        phones = Model(table, colum_list)
+        phone_ =[]
+        cur = db.con.cursor()
+        sql = f"SELECT {params[0]} FROM {self.table} WHERE "\
+                    f"{params[1]}='{params[2]}'"
+        cur.execute(sql)
         duble = cur.fetchall()
         if len(duble) != 0:
-            mtlist = []
-            for el in duble[0]:
-                mtlist.append(duble[0][match])
-                
-            if data[q] in mtlist:
-                print(f"Запись: {data[q]} уже есть.")
+            for ph in duble:
+                phone_.append(ph['phone_num'])
+
+            if data[1] in phone_:
+                print(f"Номер: {data[1]} уже есть.")
             else:
-                self.model_insert(self, data) 
+                phones.model_insert(data)
         else:
-            self.model_insert(self, data)
-        
+            phones.model_insert(data) 
+    
 
     def model_update(self, data, tabl_id, id):
         columns = ", ".join([row + '=%s' for row in self.colum_list])
